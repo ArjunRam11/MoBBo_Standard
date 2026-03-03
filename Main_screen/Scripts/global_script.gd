@@ -141,7 +141,7 @@ func _process(_delta: float) -> void:
 		var net_y_3d : float = MIN_Y + (1.0 - norm_y) * sh
 
 		# 4. Populate all game-facing position variables
-		network_position   = Vector2(net_x, net_y)
+		network_position   = Vector2(net_x, net_y_3d)
 		network_position3D = Vector2(net_x, net_y_3d)
 		scaled_network_position   = network_position
 		scaled_network_position3D = network_position3D

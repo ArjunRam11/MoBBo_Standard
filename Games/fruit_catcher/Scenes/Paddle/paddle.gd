@@ -64,8 +64,8 @@ func _read_board_weights() -> bool:
 	if cops.size() < 2:
 		return false
 
-	var cop_a = cops[0]
-	var cop_b = cops[1]
+	var cop_a = cops[1]
+	var cop_b = cops[0]
 
 	if typeof(cop_a) != TYPE_DICTIONARY or typeof(cop_b) != TYPE_DICTIONARY:
 		return false

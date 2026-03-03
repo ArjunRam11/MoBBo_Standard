@@ -1,9 +1,9 @@
 [gd_scene load_steps=12 format=3 uid="uid://wvw586u8r01h"]
 
-[ext_resource type="Shader" uid="uid://bspoxwwd1okww" path="res://Games/flappy_bird/Scenes/bird.gdshader" id="1_6rd7f"]
-[ext_resource type="Texture2D" uid="uid://uoq3jhwpvq60" path="res://Assets/Plane/Fly (1).png" id="1_m7guw"]
-[ext_resource type="Texture2D" uid="uid://dnf8uvl8pqvsb" path="res://Assets/Plane/Dead (1).png" id="1_yeo3c"]
-[ext_resource type="Texture2D" uid="uid://bj3k8mt4gmyye" path="res://Assets/Plane/Fly (2).png" id="2_e12hl"]
+[ext_resource type="Shader" uid="uid://d0vwjlyxd4ivl" path="res://Games/flappy_bird/Scenes/bird.gdshader" id="1_6rd7f"]
+[ext_resource type="Texture2D" uid="uid://b3m72arpv3rwq" path="res://Assets/Plane/Fly (1).png" id="1_m7guw"]
+[ext_resource type="Texture2D" uid="uid://mymogflnpmcs" path="res://Assets/Plane/Dead (1).png" id="1_yeo3c"]
+[ext_resource type="Texture2D" uid="uid://cswo2re8gd54t" path="res://Assets/Plane/Fly (2).png" id="2_e12hl"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_0bfnj"]
 shader = ExtResource("1_6rd7f")
