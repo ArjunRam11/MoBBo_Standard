@@ -14,7 +14,9 @@ var assessment_scene = preload("res://Games/assessment/workspace.tscn")
 var results_scene = preload("res://Results/scenes/user_progress.tscn")
 var main_menu_scene = preload("res://Main_screen/Scenes/main.tscn")
 var modescene = preload("res://Main_screen/Scenes/mode.tscn")
-var endgame : bool
+var cop_vis_scene = preload("res://Games/COP_visualise/COP_VIZ.tscn")
+
+
 
 func _ready() -> void:
 	logged_in_as.text = "Patient: " + PatientDB.current_patient_id
@@ -75,7 +77,7 @@ func _on_game_pingpong_pressed() -> void:
 	
 
 func _on_assessment_pressed() -> void:
-	get_tree().change_scene_to_packed(assessment_scene)
+	get_tree().change_scene_to_packed(cop_vis_scene)
 	
 func _on_mode_pressed() -> void:
 	get_tree().change_scene_to_packed(modescene)
