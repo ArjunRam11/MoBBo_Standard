@@ -78,10 +78,6 @@ var clamp_vector_y = Vector2(MAX_X, MAX_Y)
 @onready var disconnected: bool = false
 @onready var reset_position: bool = false
 
-# Paths and platform-specific variables
-@onready var interpreter_path: String
-@onready var pyscript_path: String
-@onready var pypath_checker_path : String
 @export var endgame:bool = false
 
 # ============================================================
@@ -151,25 +147,10 @@ func _ready():
 	current_date = get_date_string()
 	load_session_info()
 
-	# Bind to port 8000 to RECEIVE CoP + Board Pose from MOBBO
-	var bind_result = udp.bind(8000, "127.0.0.1")
-	if bind_result == OK:
-		print("✅ UDP socket bound to port 8000 - ready to receive LOCAL CoP, GCoP, and Board Pose")
-	else:
-		print("❌ Failed to bind UDP socket to port 8000 - Error code: %d" % bind_result)
-
-	# DISABLED: Port 8001 removed - only using port 8000 for all CoP and Board Pose data
-	# # Bind to port 8001 to RECEIVE FBP + BoS from MOBBO
-	# var bind_result_camera = udp_camera.bind(8001, "127.0.0.1")
-	# if bind_result_camera == OK:
-	# 	pass # print("✅ UDP socket bound to port 8001 - ready to receive FBP + BoS")
-	# else:
-	# 	pass # print("❌ Failed to bind UDP socket to port 8001 - Error code: %d" % bind_result_camera)
-
-	#thread_python.start(python_thread, Thread.PRIORITY_HIGH)
-	thread_network.start(network_thread)
-	# DISABLED: Port 8001 thread removed - FBP/BoS disabled
-	# thread_network_camera.start(network_thread_camera)
+	# UDP in GlobalScript is disabled - CoPManager handles board communication
+	# CoPManager binds to ports 8000-8005 for each board
+	
+	# CoPManager handles board communication - no network thread needed here
 
 	# print(MAX_X, " " + str(MAX_Y))
 	
@@ -186,16 +167,6 @@ func _ready():
 	add_child(message_timer)
 	GlobalSignals.SignalBus.connect(handle_quit_request)
 	get_tree().set_auto_accept_quit(false)
-	
-	if OS.get_name() == "Windows":
-		pyscript_path = "E:\\Godot_interface\\MOBBO_3D_GAMES\\MOBBO_3D_GAMES\\main_4pt.py"
-		pypath_checker_path = "E:\\CMC\\pyprojects\\programs_rpi\\rpi_python\\file_integrity.py"
-		interpreter_path = "C:\\Users\\Asus\\miniconda3\\envs\\mb\\python.exe"
-	else:
-		pass
-		#pyscript_path = "/home/sujith/Documents/rpi_python/stream_optimize.py"
-		#pypath_checker_path = "/home/sujith/Documents/rpi_python/file_integrity.py"
-		#interpreter_path = "/home/sujith/Documents/rpi_python/venv/bin/python"
 
 	_last_udp_packet_ms = Time.get_ticks_msec()
 	_last_cop_packet_ms = Time.get_ticks_msec()
@@ -203,16 +174,26 @@ func _ready():
 
 
 func _process(_delta: float) -> void:
-	if not thread_python.is_alive() and not endgame and not debug:
-		thread_python = Thread.new()
-		thread_python.start(python_thread, Thread.PRIORITY_HIGH)
+	# Forward CoP data from CoPManager to GlobalScript for game compatibility
+	if CoPManager.is_configured():
+		network_position = CoPManager.get_scaled_position_2d()
+		network_position3D = CoPManager.get_scaled_position_3d()
+		net_x = network_position.x
+		net_y = network_position.y
+		var cop = CoPManager.get_combined_cop()
+		raw_x = cop.x
+		raw_y = cop.y
+		raw_z = cop.z
 		
+		# Update local_cops from CoPManager
+		local_cops = CoPManager.local_cops.duplicate(true)
+		num_local_cops = local_cops.size()
+	
 	match _incoming_message:
 		-99.0:
 			disconnected = true
 			endgame = true
-			thread_network.wait_to_finish()
-			thread_python.wait_to_finish()
+			handle_quit_request()
 			get_tree().quit()
 		2.0:
 			connected = true
@@ -220,12 +201,6 @@ func _process(_delta: float) -> void:
 			reset_position = true
 
 	_process_reset_trace()
-
-
-func _path_checker():
-	var output = []
-	OS.execute(interpreter_path, [pypath_checker_path], output)
-	print(output)
 
 
 func start_reset_trace(reset_press_ms: int) -> void:
@@ -258,22 +233,7 @@ func network_thread():
 
 func handle_quit_request():
 	_outgoing_message = "STOP"
-
-	# Send shutdown to Python COMMAND port (9000), not data port	
-	var command_socket = PacketPeerUDP.new()
-	var quit_command = {
-		"type": "app_control",
-		"action": "shutdown",
-		"timestamp": Time.get_ticks_msec()
-	}
-	var json_str = JSON.stringify(quit_command)
-	if command_socket.set_dest_address("127.0.0.1", 9000) == OK:
-		command_socket.put_packet(json_str.to_utf8_buffer())
-		print("✅ Shutdown sent to Python port 9000")
-
-	# Also handle the quit_request flag path (existing code)
-	if not quit_request:
-		return
+	CoPManager.shutdown()
 
 
 func handle_udp_packet():
@@ -812,7 +772,7 @@ func _notification(what: int) -> void:
 		quit_request = true
 		endgame = true
 		handle_quit_request()
-		thread_python.wait_to_finish()
+		CoPManager.shutdown()
 		get_tree().quit()
 
 

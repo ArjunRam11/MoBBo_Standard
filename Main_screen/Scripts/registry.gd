@@ -95,7 +95,6 @@ func _save_patient_data() -> void:
 		file.close()
 	else:
 		push_error("Failed to save JSON file at: " + json_path)
-	GlobalScript._path_checker()
 
 func _create_patient_display_text(patient: Dictionary) -> String:
 	return "Hosp ID: %s\nName: %s\nAge: %d\nGender: %s\nDiag time: %d\nDominant hand: %s\nAffected hand: %s\nComments:\n%s" % [

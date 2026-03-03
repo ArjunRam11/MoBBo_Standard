@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://cepewkouuso6s"]
+[gd_scene load_steps=3 format=3 uid="uid://cepewkouuso6s"]
 
 [ext_resource type="Script" uid="uid://cpppjjdkahv2j" path="res://Main_screen/Scripts/Boardsetupscene.gd" id="1_x8wd3"]
+[ext_resource type="Script" uid="uid://crj3omhughtv0" path="res://Main_screen/Scripts/network_scanner.gd" id="2_wf6xw"]
 
 [node name="BoardIPSetup" type="Control"]
 layout_mode = 3
@@ -32,17 +33,17 @@ text = "MoBBo Device Setup
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="Gridwrap" type="VBoxContainer" parent="VBox/Body"]
+[node name="GridWrap" type="VBoxContainer" parent="VBox/Body"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 0
 
-[node name="GridLabel" type="Label" parent="VBox/Body/Gridwrap"]
+[node name="GridLabel" type="Label" parent="VBox/Body/GridWrap"]
 layout_mode = 2
 text = "Board Layout
 "
 
-[node name="BoardGrid" type="Control" parent="VBox/Body/Gridwrap"]
+[node name="BoardGrid" type="Control" parent="VBox/Body/GridWrap"]
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -101,3 +102,7 @@ text = "🎮 Games →"
 [node name="ConfirmBtn" type="Button" parent="VBox/Footer"]
 layout_mode = 2
 text = "✅ Confirm"
+
+[node name="Button" type="Button" parent="VBox/Footer"]
+layout_mode = 2
+script = ExtResource("2_wf6xw")

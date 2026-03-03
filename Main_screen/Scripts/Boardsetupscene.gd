@@ -110,17 +110,17 @@ const C_BDR_FLSH := Color(1.0,  0.84, 0.25)
 const C_BDR_AUTO := Color(0.24, 0.55, 1.0)
 
 # ─── Node refs ────────────────────────────────────────────────
-@onready var layout_select: OptionButton  = $Body/RightPanel/LayoutSelect
-@onready var scan_btn     : Button        = $Body/RightPanel/ControlsRow/ScanBtn
-@onready var clear_btn    : Button        = $Body/RightPanel/ControlsRow/ClearBtn
-@onready var board_grid   : Control       = $Body/GridWrap/BoardGrid
-@onready var ip_list      : VBoxContainer = $Body/RightPanel/ScrollContainer/IPList
-@onready var summary      : VBoxContainer = $Body/RightPanel/Summary
-@onready var status_dot   : ColorRect     = $StatusBar/Dot
-@onready var status_text  : Label         = $StatusBar/StatusText
-@onready var footer_hint  : Label         = $Footer/FooterHint
-@onready var confirm_btn  : Button        = $Footer/ConfirmBtn
-@onready var games_btn    : Button        = $Footer/GamesBtn
+@onready var layout_select: OptionButton  = $VBox/Body/RightPanel/LayoutSelect
+@onready var scan_btn     : Button        = $VBox/Body/RightPanel/ControlsRow/ScanBtn
+@onready var clear_btn    : Button        = $VBox/Body/RightPanel/ControlsRow/ClearBtn
+@onready var board_grid   : Control       = $VBox/Body/GridWrap/BoardGrid
+@onready var ip_list      : VBoxContainer = $VBox/Body/RightPanel/ScrollContainer/IPList
+@onready var summary      : VBoxContainer = $VBox/Body/RightPanel/Summary
+@onready var status_dot   : ColorRect     = $VBox/StatusBar/Dot
+@onready var status_text  : Label         = $VBox/StatusBar/StatusText
+@onready var footer_hint  : Label         = $VBox/Footer/FooterHint
+@onready var confirm_btn  : Button        = $VBox/Footer/ConfirmBtn
+@onready var games_btn    : Button        = $VBox/Footer/GamesBtn
 
 # ═════════════════════════════════════════════════════════════
 func _ready() -> void:
@@ -310,11 +310,13 @@ func _on_scan_pressed() -> void:
 	scanning = true
 	discovered.clear()
 	_reset_assignments()
-	set_status("🔍 Broadcasting on 255.255.255.255:%d …" % BOARD_PORT, "warn")
+	
+	var broadcast_addr = "192.168.0.255"
+	set_status("🔍 Broadcasting on %s:%d …" % [broadcast_addr, BOARD_PORT], "warn")
 	scan_btn.text = "Scanning…"
 
 	udp_send.set_broadcast_enabled(true)
-	udp_send.set_dest_address("255.255.255.255", BOARD_PORT)
+	udp_send.set_dest_address(broadcast_addr, BOARD_PORT)
 	udp_send.put_packet(DISCOVERY_MSG.to_utf8_buffer())
 
 	await get_tree().create_timer(SCAN_SECS).timeout
@@ -523,43 +525,22 @@ func _on_confirm_pressed() -> void:
 	confirm_btn.disabled = true
 	games_btn.show()
 
-	# Build and push to GlobalScript
-	GlobalScript.board_layout = layout["id"]
-	if int(layout["boards"]) <= 2:
-		var labels : Array = layout["slots"]
-		for i in slot_assigned.size():
-			var serial : int   = int(slot_assigned[i])
-			var lbl    : String = (labels[i] as String).to_lower()
-			match lbl:
-				"left":   GlobalScript.board_ip_left   = _ip_for_serial(serial)
-				"right":  GlobalScript.board_ip_right  = _ip_for_serial(serial)
-				"top":    GlobalScript.board_ip_top    = _ip_for_serial(serial)
-				"bottom": GlobalScript.board_ip_bottom = _ip_for_serial(serial)
-	else:
-		# For 3-6 boards: board1..board6
-		if not GlobalScript.get("multi_board_ips"):
-			pass  # add var multi_board_ips: Array = [] to GlobalScript
-		var arr := []
-		for i in slot_assigned.size():
-			arr.append({
-				"board": i + 1,
-				"position": layout["slots"][i],
-				"ip": _ip_for_serial(slot_assigned[i])
-			})
-		GlobalScript.multi_board_ips = arr
+	var assignments = []
+	for i in slot_assigned.size():
+		assignments.append({
+			"slot": layout["slots"][i],
+			"serial": slot_assigned[i],
+			"ip": _ip_for_serial(slot_assigned[i])
+		})
+	
+	CoPManager.set_board_config(layout["id"], assignments)
 
 	# Persist
 	var cfg := {
 		"layout":      layout["id"],
 		"boards":      layout["boards"],
-		"assignments": []
+		"assignments": assignments
 	}
-	for i in slot_assigned.size():
-		cfg["assignments"].append({
-			"slot":     layout["slots"][i],
-			"serial":   slot_assigned[i],
-			"ip":       _ip_for_serial(slot_assigned[i])
-		})
 	var f := FileAccess.open("user://board_config.json", FileAccess.WRITE)
 	f.store_string(JSON.stringify(cfg))
 	f.close()
@@ -567,7 +548,7 @@ func _on_confirm_pressed() -> void:
 	set_status("✅ Config saved! Press 🎮 Games to continue.", "ok")
 
 func _on_games_pressed() -> void:
-	get_tree().change_scene_to_file("res://Games/MainMenu.tscn")  # ← your path
+	get_tree().change_scene_to_file("res://Main_screen/Scenes/mode.tscn")
 
 # ─────────────────────────────────────────────────────────────
 #  STATUS BAR
@@ -585,6 +566,6 @@ func set_status(msg: String, type: String) -> void:
 #  RESIZE
 # ─────────────────────────────────────────────────────────────
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_RESIZED:
+	if what == NOTIFICATION_RESIZED and layout.size() > 0:
 		_build_slot_rects()
 		board_grid.queue_redraw()
