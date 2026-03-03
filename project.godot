@@ -25,7 +25,6 @@ PatientDB="*res://Main_screen/Scripts/patient_db.gd"
 Manager="*res://Main_screen/Scripts/manager.gd"
 GlobalSignals="*res://Main_screen/Scripts/global_signals.gd"
 CoPManager="*res://Main_screen/Scripts/cop_manager.gd"
-NetworkScanner="*res://Main_screen/Scripts/network_scanner.gd"
 GlobalScript="*res://Main_screen/Scripts/global_script.gd"
 SoundFx="*res://Main_screen/Scenes/SoundFx.tscn"
 GlobalTimer="*res://Main_screen/Scripts/global_timer.gd"
@@ -37,6 +36,7 @@ GlobalTimerManager="*res://Main_screen/Scripts/GlobalTimerManager.gd"
 MusicManager="*res://Main_screen/Scripts/MusicManager.gd"
 ButtonSoundManager="*res://Main_screen/Scripts/btn_sound_manager.gd"
 CircularTimer="*res://Games/random_reach/scenes/circular_timer.gd"
+NetworkScanner="*res://Main_screen/Scripts/network_scanner.gd"
 
 [display]
 

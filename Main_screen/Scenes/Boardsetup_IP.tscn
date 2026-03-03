@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://cepewkouuso6s"]
+[gd_scene load_steps=2 format=3 uid="uid://dp77txaay0es6"]
 
 [ext_resource type="Script" uid="uid://cpppjjdkahv2j" path="res://Main_screen/Scripts/Boardsetupscene.gd" id="1_x8wd3"]
-[ext_resource type="Script" uid="uid://crj3omhughtv0" path="res://Main_screen/Scripts/network_scanner.gd" id="2_wf6xw"]
 
 [node name="BoardIPSetup" type="Control"]
 layout_mode = 3
@@ -26,8 +25,8 @@ size_flags_vertical = 0
 
 [node name="TitleLabel" type="Label" parent="VBox/Header"]
 layout_mode = 2
-text = "MoBBo Device Setup
-"
+theme_override_font_sizes/font_size = 18
+text = "MoBBo Device Setup"
 
 [node name="Body" type="HBoxContainer" parent="VBox"]
 layout_mode = 2
@@ -36,20 +35,22 @@ size_flags_vertical = 3
 [node name="GridWrap" type="VBoxContainer" parent="VBox/Body"]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_vertical = 0
+size_flags_vertical = 3
 
 [node name="GridLabel" type="Label" parent="VBox/Body/GridWrap"]
 layout_mode = 2
-text = "Board Layout
-"
+size_flags_vertical = 0
+text = "Board Layout"
 
 [node name="BoardGrid" type="Control" parent="VBox/Body/GridWrap"]
 layout_mode = 2
+size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="RightPanel" type="VBoxContainer" parent="VBox/Body"]
-custom_minimum_size = Vector2(280, 0)
+custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
+size_flags_vertical = 3
 
 [node name="LayoutSelect" type="OptionButton" parent="VBox/Body/RightPanel"]
 layout_mode = 2
@@ -59,8 +60,7 @@ layout_mode = 2
 
 [node name="ScanBtn" type="Button" parent="VBox/Body/RightPanel/ControlsRow"]
 layout_mode = 2
-text = "🔍 Scan
-"
+text = "🔍 Scan"
 
 [node name="ClearBtn" type="Button" parent="VBox/Body/RightPanel/ControlsRow"]
 layout_mode = 2
@@ -72,37 +72,36 @@ size_flags_vertical = 3
 
 [node name="IPList" type="VBoxContainer" parent="VBox/Body/RightPanel/ScrollContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="Summary" type="VBoxContainer" parent="VBox/Body/RightPanel"]
 layout_mode = 2
+size_flags_vertical = 0
 
 [node name="StatusBar" type="HBoxContainer" parent="VBox"]
 layout_mode = 2
-size_flags_vertical = 8
+size_flags_vertical = 0
 
 [node name="Dot" type="ColorRect" parent="VBox/StatusBar"]
-custom_minimum_size = Vector2(10, 10)
+custom_minimum_size = Vector2(14, 14)
 layout_mode = 2
 
 [node name="StatusText" type="Label" parent="VBox/StatusBar"]
 layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="Footer" type="HBoxContainer" parent="VBox"]
 layout_mode = 2
-size_flags_vertical = 8
+size_flags_vertical = 0
 
 [node name="FooterHint" type="Label" parent="VBox/Footer"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="GamesBtn" type="Button" parent="VBox/Footer"]
-layout_mode = 2
-text = "🎮 Games →"
-
 [node name="ConfirmBtn" type="Button" parent="VBox/Footer"]
 layout_mode = 2
 text = "✅ Confirm"
 
-[node name="Button" type="Button" parent="VBox/Footer"]
+[node name="GamesBtn" type="Button" parent="VBox/Footer"]
 layout_mode = 2
-script = ExtResource("2_wf6xw")
+text = "Games"
