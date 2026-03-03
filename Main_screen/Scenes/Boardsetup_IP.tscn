@@ -1,0 +1,103 @@
+[gd_scene load_steps=2 format=3 uid="uid://cepewkouuso6s"]
+
+[ext_resource type="Script" uid="uid://cpppjjdkahv2j" path="res://Main_screen/Scripts/Boardsetupscene.gd" id="1_x8wd3"]
+
+[node name="BoardIPSetup" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_x8wd3")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Header" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="TitleLabel" type="Label" parent="VBox/Header"]
+layout_mode = 2
+text = "MoBBo Device Setup
+"
+
+[node name="Body" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Gridwrap" type="VBoxContainer" parent="VBox/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+
+[node name="GridLabel" type="Label" parent="VBox/Body/Gridwrap"]
+layout_mode = 2
+text = "Board Layout
+"
+
+[node name="BoardGrid" type="Control" parent="VBox/Body/Gridwrap"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="RightPanel" type="VBoxContainer" parent="VBox/Body"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+
+[node name="LayoutSelect" type="OptionButton" parent="VBox/Body/RightPanel"]
+layout_mode = 2
+
+[node name="ControlsRow" type="HBoxContainer" parent="VBox/Body/RightPanel"]
+layout_mode = 2
+
+[node name="ScanBtn" type="Button" parent="VBox/Body/RightPanel/ControlsRow"]
+layout_mode = 2
+text = "🔍 Scan
+"
+
+[node name="ClearBtn" type="Button" parent="VBox/Body/RightPanel/ControlsRow"]
+layout_mode = 2
+text = "✕ Reset"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VBox/Body/RightPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="IPList" type="VBoxContainer" parent="VBox/Body/RightPanel/ScrollContainer"]
+layout_mode = 2
+
+[node name="Summary" type="VBoxContainer" parent="VBox/Body/RightPanel"]
+layout_mode = 2
+
+[node name="StatusBar" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 8
+
+[node name="Dot" type="ColorRect" parent="VBox/StatusBar"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+
+[node name="StatusText" type="Label" parent="VBox/StatusBar"]
+layout_mode = 2
+
+[node name="Footer" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 8
+
+[node name="FooterHint" type="Label" parent="VBox/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="GamesBtn" type="Button" parent="VBox/Footer"]
+layout_mode = 2
+text = "🎮 Games →"
+
+[node name="ConfirmBtn" type="Button" parent="VBox/Footer"]
+layout_mode = 2
+text = "✅ Confirm"

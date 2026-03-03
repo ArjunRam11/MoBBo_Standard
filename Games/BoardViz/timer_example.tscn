@@ -1,0 +1,36 @@
+[gd_scene load_steps=2 format=3 uid="uid://bvd8h3b2x8d21"]
+
+[ext_resource type="Script" path="res://Games/BoardViz/timer_manager.gd" id="1_a1b0d"]
+
+[node name="TimerManager" type="Node"]
+script = ExtResource("1_a1b0d")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = 100
+
+[node name="TimerLabel" type="Label" parent="CanvasLayer"]
+anchor_left = 0.5
+anchor_top = 0.05
+anchor_right = 0.5
+anchor_bottom = 0.15
+offset_left = -120.0
+offset_top = 10.0
+offset_right = 120.0
+offset_bottom = 90.0
+text = "00:00:00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="TimerButton" type="Button" parent="CanvasLayer"]
+anchor_left = 0.5
+anchor_top = 0.15
+anchor_right = 0.5
+anchor_bottom = 0.21
+offset_left = -60.0
+offset_top = 100.0
+offset_right = 60.0
+offset_bottom = 150.0
+text = "Start"
+
+[node name="InternalTimer" type="Timer" parent="."]
+wait_time = 0.1
