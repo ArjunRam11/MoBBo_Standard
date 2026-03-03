@@ -289,18 +289,13 @@ func _input(event: InputEvent) -> void:
 #  PROCESS — poll UDP during scan + CoP debug print
 # ══════════════════════════════════════════════════════════════════════════════
 func _process(_delta: float) -> void:
-	# Discovery: collect sender IPs while scanning
 	if _scanning:
-		while udp_sock.get_available_packet_count() > 0:
-			udp_sock.get_packet()
-			var addr : String = udp_sock.get_packet_ip()
-			if addr == "" or addr == LOCAL_IP: continue
-			if discovered.any(func(d): return d["ip"] == addr): continue
-			discovered.append({ "serial": discovered.size() + 1, "ip": addr })
+		for ip in CoPManager.get_discovery_replies():
+			if discovered.any(func(d): return d["ip"] == ip): continue
+			discovered.append({ "serial": discovered.size() + 1, "ip": ip })
 			_refresh_ui()
 			set_status("Found %d board(s). Still scanning…" % discovered.size(), "ok")
 
-	# CoP debug print (throttled to every 60 frames)
 	if CoPManager.is_configured() and Engine.get_process_frames() % 60 == 0:
 		_print_cop_debug()
 
@@ -461,30 +456,21 @@ func _on_scan_pressed() -> void:
 	discovered.clear()
 	_reset_assignments()
 
-	udp_sock.close()
-	if udp_sock.bind(0, "0.0.0.0") != OK:
-		set_status("❌ UDP socket error. Try again.", "err")
-		scanning = false
-		return
-
-	udp_sock.set_broadcast_enabled(true)
-	udp_sock.set_dest_address(BROADCAST_IP, BOARD_PORT)
-	udp_sock.put_packet(DISCOVERY_MSG.to_utf8_buffer())
-	print("📡 Sent '%s' → %s:%d" % [DISCOVERY_MSG, BROADCAST_IP, BOARD_PORT])
+	# Use CoPManager's port-23000 socket — boards reply back to same port
+	CoPManager.broadcast_discovery()
 
 	_scanning     = true
 	scan_btn.text = "Scanning…"
-	set_status("📡 Broadcast sent → %s  listening for replies…" % BROADCAST_IP, "warn")
+	set_status("📡 Scanning… listening for replies.", "warn")
 
 	await get_tree().create_timer(SCAN_SECS).timeout
 
 	_scanning     = false
 	scanning      = false
-	udp_sock.set_broadcast_enabled(false)
 	scan_btn.text = "🔍 Scan"
 
 	if discovered.is_empty():
-		set_status("❌ No boards replied. Check network / power.", "err")
+		set_status("❌ No boards found. Check network / power.", "err")
 	else:
 		set_status("✅ Found %d board(s). Flash 💡 → click its slot." % discovered.size(), "ok")
 	_refresh_ui()
@@ -528,9 +514,7 @@ func _led_off(serial: int) -> void:
 func _send_led(serial: int, on: bool) -> void:
 	var ip := _ip_for_serial(serial)
 	if ip == "": return
-	udp_sock.set_broadcast_enabled(false)
-	udp_sock.set_dest_address(ip, BOARD_PORT)
-	udp_sock.put_packet(PackedByteArray([LED_ON_BYTE if on else LED_OFF_BYTE]))
+	CoPManager.send_led(ip, on)
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  AUTO-ASSIGN

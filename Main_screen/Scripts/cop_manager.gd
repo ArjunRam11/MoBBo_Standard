@@ -36,7 +36,7 @@ const HALF_W   : float = BOARD_W / 2.0   # 30 cm
 const HALF_H   : float = BOARD_H / 2.0   # 22.5 cm
 
 # ── Network ───────────────────────────────────────────────────────────────────
-const BOARD_DATA_PORT : int = 8000   # all boards stream to this port
+const BOARD_PORT : int = 23000   # all boards stream to this port
 const BOARD_CMD_PORT  : int = 23000  # LED / command port on the board side
 
 # Packet layout:  4 header bytes  +  7 × float32  = 32 bytes
@@ -106,6 +106,7 @@ func set_board_config(layout_id: String, assign_array: Array) -> void:
 	_compute_ranges()
 	_save_config()
 	_start_listening()
+	ping_boards()
 
 	print("✅ CoPManager configured — layout=%s  cols=%d  rows=%d  boards=%d" \
 		% [layout_id, _n_cols, _n_rows, board_count])
@@ -143,6 +144,7 @@ func _apply_config(cfg: Dictionary) -> void:
 	_parse_layout(board_layout)
 	_compute_ranges()
 	_start_listening()
+	ping_boards()
 
 func _load_saved_config() -> void:
 	if FileAccess.file_exists("user://board_config.json"):
@@ -169,11 +171,11 @@ func _start_listening() -> void:
 	if board_ips.is_empty():
 		print("⚠️ CoPManager: no board IPs — not listening")
 		return
-	if _udp.bind(BOARD_DATA_PORT, "0.0.0.0") == OK:
+	if _udp.bind(BOARD_PORT, "0.0.0.0") == OK:
 		is_listening = true
-		print("✅ CoPManager listening on 0.0.0.0:%d" % BOARD_DATA_PORT)
+		print("✅ CoPManager listening on 0.0.0.0:%d" % BOARD_PORT)
 	else:
-		print("❌ CoPManager failed to bind port %d" % BOARD_DATA_PORT)
+		print("❌ CoPManager failed to bind port %d" % BOARD_PORT)
 
 func _stop_listening() -> void:
 	if is_listening:
@@ -201,6 +203,7 @@ func _process(_delta: float) -> void:
 # ── Packet parsing ────────────────────────────────────────────────────────────
 
 func _handle_packet(pkt: PackedByteArray, sender_ip: String) -> void:
+	print('coming')
 	if sender_ip not in board_ips:
 		return
 	if pkt.size() < PACKET_SIZE:
@@ -395,8 +398,8 @@ func get_layout_range_y() -> Vector2:
 # ══════════════════════════════════════════════════════════════════════════════
 
 func send_led(ip: String, on: bool) -> void:
-	_udp_cmd.set_dest_address(ip, BOARD_CMD_PORT)
-	_udp_cmd.put_packet(PackedByteArray([0x10 if on else 0x20]))
+	_udp_cmd.set_dest_address(ip, BOARD_PORT)
+	_udp_cmd.put_packet(PackedByteArray([0x21 if on else 0x20]))
 
 # ══════════════════════════════════════════════════════════════════════════════
 #  SHUTDOWN
@@ -404,3 +407,38 @@ func send_led(ip: String, on: bool) -> void:
 
 func shutdown() -> void:
 	_stop_listening()
+# ══════════════════════════════════════════════════════════════════════════════
+#  PING — teaches each board to stream back to our port 8000
+# ══════════════════════════════════════════════════════════════════════════════
+
+func ping_boards() -> void:
+	if not is_listening:
+		print("⚠️ CoPManager: cannot ping — not listening yet")
+		return
+	# Send a GET_STATUS command (0x50) to each board from our port-8000 socket.
+	# The board receives it, sees remoteIP:remotePort = us:8000,
+	# and from then on streams CoP data back to port 8000.
+	for ip in board_ips:
+		if ip == "":
+			continue
+		_udp.set_dest_address(ip, BOARD_CMD_PORT)
+		_udp.put_packet(PackedByteArray([0x50]))  # GET_STATUS command
+		print("📡 Pinged board %s → now streaming to port %d" % [ip, BOARD_PORT])
+		
+func broadcast_discovery() -> void:
+	if not is_listening: return
+	_udp.set_broadcast_enabled(true)
+	_udp.set_dest_address("192.168.0.255", BOARD_PORT)
+	_udp.put_packet("Hey!mobbos".to_utf8_buffer())
+	_udp.set_broadcast_enabled(false)
+	print("📡 Sent 'Hey!mobbos' → 192.168.0.255:%d" % BOARD_PORT)
+
+func get_discovery_replies() -> Array:
+	# Returns list of new IPs that sent packets (for scan use)
+	var new_ips : Array = []
+	while _udp.get_available_packet_count() > 0:
+		_udp.get_packet()
+		var ip : String = _udp.get_packet_ip()
+		if ip != "" and ip not in new_ips:
+			new_ips.append(ip)
+	return new_ips
